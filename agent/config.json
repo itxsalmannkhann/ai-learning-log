@@ -1,0 +1,9 @@
+{
+  "repos": [
+    { "url": "https://github.com/itxsalmannkhann/QR-Code-based-Student-Attendance-System" },
+    { "url": "https://github.com/itxsalmannkhann/Spam-Shield" },
+    { "url": "https://github.com/itxsalmannkhann/Emotion-Recognition-Speech" },
+    { "url": "https://github.com/itxsalmannkhann/EdTech-Platform" }
+  ],
+  "tasks": ["docstring", "comment_cleanup", "readme_update", "lint_fix"]
+}
