@@ -1,0 +1,38 @@
+name: Daily AI Agent
+
+on:
+  schedule:
+    - cron: '0 9 * * *'   # 9:00 UTC = 2:00 PM PKT - adjust if you want a different time
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run in dry-run mode (no commits/pushes)?'
+        required: false
+        default: 'true'   # manual runs default SAFE; cron runs always go live
+
+permissions:
+  contents: write   # needed so the workflow can push the log entry to this repo
+
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout control repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r agent/requirements.txt
+
+      - name: Run agent
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+          # Manual runs use the dry_run input (default true).
+          # Scheduled (cron) runs have no input, so this always evaluates to 'false'.
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: python agent/agent.py
