@@ -26,7 +26,7 @@ import requests
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 GH_PAT = os.environ.get("GH_PAT")
-DRY_RUN = os.environ.get("DRY_RUN", "true").lower() == "true"
+DRY_RUN = os.environ.get("DRY_RUN", "false").lower() == "flase"
 
 GROQ_MODEL = "llama-3.3-70b-versatile"
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
