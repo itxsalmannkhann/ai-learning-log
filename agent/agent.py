@@ -26,7 +26,7 @@ import requests
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 GH_PAT = os.environ.get("GH_PAT")
-DRY_RUN = os.environ.get("DRY_RUN", "false").lower() == "false"
+DRY_RUN = os.environ.get("DRY_RUN", "true").lower() == "true"
 
 GROQ_MODEL = "llama-3.3-70b-versatile"
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
@@ -221,7 +221,16 @@ def git_commit_and_push(repo_path, message):
     if "nothing to commit" in result.stdout:
         print("Nothing changed, skipping push.")
         return False
-    subprocess.run(["git", "-C", str(repo_path), "push"], check=True)
+
+    push = subprocess.run(
+        ["git", "-C", str(repo_path), "push"],
+        capture_output=True, text=True,
+    )
+    if push.returncode != 0:
+        # Remote moved on since we cloned/checked out - pull and retry once.
+        print("Push rejected, pulling with rebase and retrying:\n", push.stderr)
+        subprocess.run(["git", "-C", str(repo_path), "pull", "--rebase"], check=True)
+        subprocess.run(["git", "-C", str(repo_path), "push"], check=True)
     return True
 
 
