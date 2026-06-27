@@ -148,10 +148,23 @@ def call_groq(system_prompt, user_prompt):
     return resp.json()["choices"][0]["message"]["content"]
 
 
+def strip_code_fences(text):
+    """Models often wrap output in ```fences despite instructions not to.
+    Strip them so a fenced-but-otherwise-correct response isn't rejected."""
+    text = text.strip()
+    if text.startswith("```"):
+        lines = text.split("\n")
+        lines = lines[1:]  # drop opening ``` or ```python line
+        if lines and lines[-1].strip().startswith("```"):
+            lines = lines[:-1]  # drop closing ``` line
+        text = "\n".join(lines)
+    return text.strip()
+
+
 def generate_change(target_file, task):
     original = target_file.read_text(encoding="utf-8")
     updated = call_groq(TASK_PROMPTS[task], f"File: {target_file.name}\n\n{original}")
-    return original, updated.strip()
+    return original, strip_code_fences(updated)
 
 
 def sanity_check_size(original, updated):
